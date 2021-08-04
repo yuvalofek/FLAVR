@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .resnet_3D import SEGating
 
+channels = 3
 def joinTensors(X1 , X2 , type="concat"):
 
     if type == "concat":
@@ -115,7 +116,7 @@ class UNet_3D_3D(nn.Module):
         super().__init__()
 
         nf = [512 , 256 , 128 , 64]        
-        out_channels = 30*n_outputs
+        out_channels = channels*n_outputs
         self.joinType = joinType
         self.n_outputs = n_outputs
 
