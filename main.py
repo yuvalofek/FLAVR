@@ -59,7 +59,8 @@ elif args.dataset == "gopro":
 elif args.dataset == "satellite":
     from dataset.Satellite import get_loader, get_train_test
     tr_paths, test_paths = get_train_test(args.data_root, random_state=214)
-    print(tr_paths, test_paths)
+    print(tr_paths)
+    print(test_paths)
     train_loader = get_loader(tr_paths, args.batch_size, shuffle=True, num_workers=args.num_workers, is_training=True, inter_frames=args.n_outputs, n_inputs=args.nbr_frame)
     test_loader = get_loader(test_paths, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, inter_frames=args.n_outputs, n_inputs=args.nbr_frame)
 else:
