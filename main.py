@@ -189,7 +189,7 @@ def main(args):
                 print("Not loading" , k)
 
         model.load_state_dict(modelStateDict)
-
+    print('Beginning to train:')
     best_psnr = 0
     for epoch in range(args.start_epoch, args.max_epoch):
         train(args, epoch)
