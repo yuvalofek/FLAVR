@@ -55,7 +55,7 @@ class SatelliteLoader(Dataset):
         self.set_length = (n_inputs-1)*(inter_frames+1)+1 ## We require these many frames in total for interpolating `interFrames` number of
                                                 ## intermediate frames with `n_input` input frames.
         if self.training:
-          self.transforms =  transforms.Compose([
+            self.transforms =  transforms.Compose([
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
                 transforms.RandomCrop(256)
