@@ -29,16 +29,18 @@ def get_loc_paths(loc_dir:str, ic=None)-> list:
   loc_paths = [paths for paths in loc_paths if len(paths)!=0]
   return loc_paths
 
-def get_train_test(data_root, test_frac=0.2, ic='modis', random_state=None, shuffle=True):
+def get_train_test(data_root, set_length, test_frac=0.2, ic='modis', random_state=None, shuffle=True):
   paths = get_loc_paths(data_root, ic)
   test_frac= test_frac*0.01 if test_frac>=1 else test_frac
-
   test_size = int(test_frac*len(paths))
-  return train_test_split(paths, test_size=test_size, random_state=random_state, shuffle=shuffle)
-
+  tr_idx, test_idx = train_test_split(list(range(len(paths)-set_length)), # all idx but last set_length-1
+                                      test_size=test_size,
+                                      random_state=random_state,
+                                      shuffle=shuffle)
+  return paths, tr_idx, test_idx
 
 class SatelliteLoader(Dataset):
-    def __init__(self, paths, is_training, inter_frames=3, n_inputs=4, ic='modis'):
+    def __init__(self, paths, idx, is_training, inter_frames=3, n_inputs=4, ic='modis'):
         """
         Creates a Vimeo Septuplet object.
         Inputs.
@@ -48,12 +50,14 @@ class SatelliteLoader(Dataset):
         """
         super().__init__()
         self.paths = paths
+        self.idx = idx
         self.training = is_training
 
         self.inter_frames = inter_frames
         self.n_inputs = n_inputs
         self.set_length = (n_inputs-1)*(inter_frames+1)+1 ## We require these many frames in total for interpolating `interFrames` number of
                                                 ## intermediate frames with `n_input` input frames.
+        self.transforms = None
         if self.training:
             self.transforms =  transforms.Compose([
                 transforms.RandomHorizontalFlip(0.5),
@@ -70,7 +74,7 @@ class SatelliteLoader(Dataset):
 
     def __getitem__(self, index):
         # get the paths corresponding to the images needed from the index
-        img_paths = [self.paths[i+index] for i in range(self.set_length)]
+        img_paths = [self.paths[i+self.idx[index]] for i in range(self.set_length)]
         
         # Load images as tensors
         images = list()
@@ -97,8 +101,8 @@ class SatelliteLoader(Dataset):
         return inp_images, gt_images
 
     def __len__(self):
-      return len(self.paths)-self.set_length+1
+        return len(self.idx)
 
-def get_loader(data_root, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
-    dataset = SatelliteLoader(data_root , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
+def get_loader(paths, idx, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
+    dataset = SatelliteLoader(paths, idx , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
