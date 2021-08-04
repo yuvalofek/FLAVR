@@ -6,7 +6,7 @@ import torch.nn as nn
 __all__ = ['unet_18', 'unet_34']
 
 useBias = False
-channels = 30
+channels = 3
 
 class identity(nn.Module):
 
