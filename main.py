@@ -59,7 +59,7 @@ elif args.dataset == "gopro":
 elif args.dataset == "satellite":
     from dataset.Satellite import get_loader
     train_loader = get_loader(args.data_root, args.batch_size, shuffle=True, num_workers=args.num_workers, is_training=True, interFrames=args.n_outputs, n_inputs=args.nbr_frame)
-    test_loader = get_loader(args.data_root, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, interFrames=args.n_outputs, n_inputs=args.nbr_frame)
+    test_loader = get_loader(args.data_root, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, inter_frames=args.n_outputs, n_inputs=args.nbr_frame)
 else:
     raise NotImplementedError
 
