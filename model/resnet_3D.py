@@ -6,6 +6,7 @@ import torch.nn as nn
 __all__ = ['unet_18', 'unet_34']
 
 useBias = False
+channels = 30
 
 class identity(nn.Module):
 
@@ -44,7 +45,7 @@ class BasicStem(nn.Sequential):
     """
     def __init__(self):
         super().__init__(
-            nn.Conv3d(3, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2),
+            nn.Conv3d(channels, 64, kernel_size=(3, 7, 7), stride=(1, 2, 2),
                 padding=(1, 3, 3), bias=useBias),
             batchnorm(64),
             nn.ReLU(inplace=False))
@@ -85,7 +86,7 @@ class R2Plus1dStem(nn.Sequential):
     """
     def __init__(self):
         super().__init__(
-            nn.Conv3d(3, 45, kernel_size=(1, 7, 7),
+            nn.Conv3d(channels, 45, kernel_size=(1, 7, 7),
                       stride=(1, 2, 2), padding=(0, 3, 3),
                       bias=False),
             batchnorm(45),
