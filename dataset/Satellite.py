@@ -97,8 +97,7 @@ class SatelliteLoader(Dataset):
         return inp_images, gt_images
 
     def __len__(self):
-        if self.training:
-            return len(self.paths)-self.set_length+1
+      return len(self.paths)-self.set_length+1
 
 def get_loader(data_root, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
     dataset = SatelliteLoader(data_root , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
