@@ -6,6 +6,28 @@ from torchvision import transforms
 from PIL import Image
 import random
 
+
+def get_loc_paths(loc_dir:str, ic=None)-> list:
+  loc_paths = list()
+  for date in sorted(os.listdir(loc_dir)):
+    date_path = os.path.join(loc_dir, date)
+
+    if not os.path.isdir(date_path):
+      continue
+    date_images = list()
+    for image in os.listdir(date_path):
+      # if specified a single ic & if the name of the image matches the ic desired
+      if ic is not None:
+          if ic in image:
+              date_images.append(os.path.join(date_path, image))
+      else:
+          # if we want all ics
+          date_images.append(os.path.join(date_path,image))
+    loc_paths.append(date_images)
+  loc_paths = [paths for paths in loc_paths if len(paths)!=0]
+  return loc_paths
+
+
 class SatelliteLoader(Dataset):
     def __init__(self, data_root, is_training , inter_frames=3, n_inputs=4):
         """
