@@ -86,10 +86,8 @@ class SatelliteLoader(Dataset):
                 images = images[::-1]
         # pick out every inter_frame+1 images as inputs
         inp_images = [images[idx] for idx in range(0, self.set_length, self.inter_frames+1)]   
-        print(list(range(0, self.set_length, self.inter_frames+1))) 
         rem = self.inter_frames%2
         gt_images = [images[idx] for idx in range(self.set_length//2-self.inter_frames//2 , self.set_length//2+self.inter_frames//2+rem)]  
-        print(list(range(self.set_length//2-self.inter_frames//2 , self.set_length//2+self.inter_frames//2+rem)) )
         return inp_images, gt_images
 
     def __len__(self):
