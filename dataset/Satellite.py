@@ -70,7 +70,7 @@ class SatelliteLoader(Dataset):
         images = list()
         for pth in img_paths: 
           with rasterio.open(pth[0]) as src:
-            images.append(torch.from_numpy(src.read(out_dtype='float'), -1))
+            images.append(torch.from_numpy(src.read(out_dtype='float')))
 
         # apply transformations if training
         if self.training:
