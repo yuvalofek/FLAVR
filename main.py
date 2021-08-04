@@ -135,7 +135,7 @@ def test(args, epoch):
         
     t = time.time()
     with torch.no_grad():
-        for i, (images, gt_image) in enumerate(tqdm(test_loader)):
+        for i, (images, gt_image) in enumerate(test_loader):
 
             images = [img_.cuda() for img_ in images]
             gt = [gt_.cuda() for gt_ in gt_image]
