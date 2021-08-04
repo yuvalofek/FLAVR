@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
 import random
+import rasterio
 
 
 def get_loc_paths(loc_dir:str, ic=None)-> list:
