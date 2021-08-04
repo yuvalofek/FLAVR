@@ -194,7 +194,7 @@ def main(args):
     for epoch in range(args.start_epoch, args.max_epoch):
         train(args, epoch)
 
-        test_loss, psnr, _ = test(args, epoch)
+        #test_loss, psnr, _ = test(args, epoch)
 
         # save checkpoint
         #is_best = psnr > best_psnr
