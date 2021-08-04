@@ -30,7 +30,7 @@ def get_loc_paths(loc_dir:str, ic=None)-> list:
 
 
 class SatelliteLoader(Dataset):
-    def __init__(self, data_root, is_training , inter_frames=3, n_inputs=4):
+    def __init__(self, data_root, is_training , inter_frames=3, n_inputs=4, ic='modis'):
         """
         Creates a Vimeo Septuplet object.
         Inputs.
@@ -46,7 +46,7 @@ class SatelliteLoader(Dataset):
         self.n_inputs = n_inputs
         self.set_length = (n_inputs-1)*(inter_frames+1)+1 ## We require these many frames in total for interpolating `interFrames` number of
                                                 ## intermediate frames with `n_input` input frames.
-        self.paths = get_loc_paths(data_root)
+        self.paths = get_loc_paths(data_root, ic)
 
         if self.training:
           self.transforms =  transforms.Compose([
@@ -94,8 +94,8 @@ class SatelliteLoader(Dataset):
         if self.training:
             return len(self.paths)-self.set_length+1
 
-def get_loader(data_root, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4):
-    dataset = SatelliteLoader(data_root , is_training, inter_frames=inter_frames, n_inputs=n_inputs)
+def get_loader(data_root, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
+    dataset = SatelliteLoader(data_root , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
 
 
