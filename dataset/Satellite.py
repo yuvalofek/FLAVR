@@ -67,10 +67,8 @@ class SatelliteLoader(Dataset):
                 #transforms.ToTensor()
             ])
         
-        #else:
-        #    self.transforms = transforms.Compose([
-        #        transforms.ToTensor()
-        #    ])
+        else:
+            self.transforms = transforms.RandomCrop(256)
 
     def __getitem__(self, index):
         # get the paths corresponding to the images needed from the index
@@ -83,17 +81,23 @@ class SatelliteLoader(Dataset):
             images.append(torch.from_numpy(src.read(out_dtype='float')[:3]).type(torch.FloatTensor))
 
         # apply transformations if training
+        seed = random.randint(0, 2**32)
+        images_ = []
         if self.training:
-            seed = random.randint(0, 2**32)
-            images_ = []
             for img_ in images:
                 # Apply the same transformation by using the same seed
                 random.seed(seed)
                 images_.append(self.transforms(img_))
-            images = images_
             # Random Temporal Flip
             if random.random() >= 0.5:
-                images = images[::-1]
+                images_ = images_[::-1]
+        else: 
+            # ensure sizes match with a crop
+            for img_ in images:
+                # Apply the same transformation by using the same seed
+                random.seed(seed)
+                images_.append(self.transforms(img_))
+        images = images_
         # pick out every inter_frame+1 images as inputs
         inp_images = [images[idx] for idx in range(0, self.set_length, self.inter_frames+1)]   
         rem = self.inter_frames%2
