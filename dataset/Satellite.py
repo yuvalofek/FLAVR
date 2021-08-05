@@ -105,4 +105,4 @@ class SatelliteLoader(Dataset):
 
 def get_loader(paths, idx, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
     dataset = SatelliteLoader(paths, idx , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
-    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True, drop_last=True)
