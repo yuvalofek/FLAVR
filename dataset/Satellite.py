@@ -40,7 +40,7 @@ def get_train_test(data_root, set_length, test_frac=0.2, ic='modis', random_stat
   return paths, tr_idx, test_idx
 
 class SatelliteLoader(Dataset):
-    def __init__(self, paths, idx, is_training, inter_frames=3, n_inputs=4, ic='modis'):
+    def __init__(self, paths, idx, is_training, inter_frames=3, n_inputs=4, ic='modis', channels=None):
         """
         Creates a Vimeo Septuplet object.
         Inputs.
@@ -52,6 +52,7 @@ class SatelliteLoader(Dataset):
         self.paths = paths
         self.idx = idx
         self.training = is_training
+        self.channels = channels 
 
         self.inter_frames = inter_frames
         self.n_inputs = n_inputs
@@ -78,7 +79,7 @@ class SatelliteLoader(Dataset):
         images = list()
         for pth in img_paths: 
           with rasterio.open(pth[0]) as src:
-            images.append(torch.from_numpy(src.read(out_dtype='float')[:3]).type(torch.FloatTensor))
+            images.append(torch.from_numpy(src.read(out_dtype='float')[:self.channels]).type(torch.FloatTensor))
 
         # apply transformations if training
         seed = random.randint(0, 2**32)
@@ -107,6 +108,6 @@ class SatelliteLoader(Dataset):
     def __len__(self):
         return len(self.idx)
 
-def get_loader(paths, idx, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis'):
-    dataset = SatelliteLoader(paths, idx , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic)
+def get_loader(paths, idx, batch_size, shuffle, num_workers, is_training=True, inter_frames=3, n_inputs=4, ic='modis', channels=3):
+    dataset = SatelliteLoader(paths, idx , is_training, inter_frames=inter_frames, n_inputs=n_inputs, ic=ic, channels=channels)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers, pin_memory=True, drop_last=True)
