@@ -112,18 +112,19 @@ class upConv2D(nn.Module):
 
 
 class UNet_3D_3D(nn.Module):
-    def __init__(self, block , n_inputs, n_outputs, batchnorm=False , joinType="concat" , upmode="transpose"):
+    def __init__(self, block , n_inputs, n_outputs, batchnorm=False , joinType="concat" , upmode="transpose", channels=3):
         super().__init__()
-
         nf = [512 , 256 , 128 , 64]        
         out_channels = channels*n_outputs
         self.joinType = joinType
         self.n_outputs = n_outputs
+        self.channels = channels
 
         growth = 2 if joinType == "concat" else 1
         self.lrelu = nn.LeakyReLU(0.2, True)
 
         unet_3D = importlib.import_module(".resnet_3D" , "model")
+        unet_3D.channels = channels 
         if n_outputs > 1:
             unet_3D.useBias = True
         self.encoder = getattr(unet_3D , block)(pretrained=False , bn=batchnorm)            
@@ -171,7 +172,7 @@ class UNet_3D_3D(nn.Module):
         out = self.lrelu(self.feature_fuse(dx_out))
         out = self.outconv(out)
 
-        out = torch.split(out, dim=1, split_size_or_sections=3)
+        out = torch.split(out, dim=1, split_size_or_sections=self.channels)
         mean_ = mean_.squeeze(2)
         out = [o+mean_ for o in out]
  
