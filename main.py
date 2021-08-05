@@ -60,15 +60,15 @@ elif args.dataset == "satellite":
     from dataset.Satellite import get_loader, get_train_test
     set_length = (args.nbr_frame-1)*(args.n_outputs+1)+1
     paths, tr_idx, test_idx = get_train_test(args.data_root, set_length, random_state=214)
-    train_loader = get_loader(paths, tr_idx, args.batch_size, shuffle=True, num_workers=args.num_workers, is_training=True, inter_frames=args.n_outputs, n_inputs=args.nbr_frame)
-    test_loader = get_loader(paths, test_idx, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, inter_frames=args.n_outputs, n_inputs=args.nbr_frame)
+    train_loader = get_loader(paths, tr_idx, args.batch_size, shuffle=True, num_workers=args.num_workers, is_training=True, inter_frames=args.n_outputs, n_inputs=args.nbr_frame, channels=args.channels)
+    test_loader = get_loader(paths, test_idx, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, inter_frames=args.n_outputs, n_inputs=args.nbr_frame, channels=args.channels)
 else:
     raise NotImplementedError
 
 
 from model.FLAVR_arch import UNet_3D_3D
 print("Building model: %s"%args.model.lower())
-model = UNet_3D_3D(args.model.lower() , n_inputs=args.nbr_frame, n_outputs=args.n_outputs, joinType=args.joinType, upmode=args.upmode)
+model = UNet_3D_3D(args.model.lower() , n_inputs=args.nbr_frame, n_outputs=args.n_outputs, joinType=args.joinType, upmode=args.upmode, channels=args.channels)
 model = torch.nn.DataParallel(model).to(device)
 
 ##### Define Loss & Optimizer #####
