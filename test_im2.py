@@ -9,7 +9,7 @@ import pdb
 import torch
 import numpy as np
 from tqdm import tqdm
-
+import rasterio
 import config
 import myutils
 
@@ -39,14 +39,16 @@ elif args.dataset == "gopro":
 elif args.dataset == "satellite":
     from dataset.Satellite import get_loader, get_train_test
     set_length = (args.nbr_frame-1)*(args.n_outputs+1)+1
-    paths, tr_idx, test_idx = get_train_test(args.data_root, set_length, random_state=214)
+    print(f'Loading {args.ic} image collection')
+    paths, tr_idx, test_idx = get_train_test(args.data_root, set_length, random_state=214, ic=args.ic)
+    print(f'Number of validation samples: {len(test_idx)}')
     train_loader = get_loader(paths, tr_idx, args.batch_size, shuffle=True, num_workers=args.num_workers, is_training=True, inter_frames=args.n_outputs, n_inputs=args.nbr_frame, channels=args.channels)
     test_loader = get_loader(paths, test_idx, args.batch_size, shuffle=False, num_workers=args.num_workers, is_training=False, inter_frames=args.n_outputs, n_inputs=args.nbr_frame, channels=args.channels)
 else:
     raise NotImplementedError
 
 
-from model.FLAVR_arch import UNet_3D_3D
+from model.FLAVR_arch_2 import UNet_3D_3D
 print("Building model: %s"%args.model.lower())
 model = UNet_3D_3D(args.model.lower() , n_inputs=args.nbr_frame, n_outputs=args.n_outputs, joinType=args.joinType, upmode=args.upmode, channels=args.channels)
 
@@ -55,20 +57,37 @@ print("#params" , sum([p.numel() for p in model.parameters()]))
 
 
 def test(args):
+    print(f'Saving image every {args.test_im_freq} images')
     time_taken = []
     losses, psnrs, ssims = myutils.init_meters(args.loss)
     model.eval()
-
     psnr_list = []
     with torch.no_grad():
         for i, (images, gt_image ) in enumerate(tqdm(test_loader)):
-
             images = [img_.cuda() for img_ in images]
             gt = [g_.cuda() for g_ in gt_image]
 
             torch.cuda.synchronize()
             start_time = time.time()
             out = model(images)
+            # save images
+
+            if i%int(args.test_im_freq) == 0:
+                for idx, image in enumerate(images):
+                    img = image.cpu().numpy()[0]
+                    with rasterio.open(f'./output/set{i:03}_img{idx}.tif','w', driver='GTiff', height=img.shape[1],
+                                       width=img.shape[2], count=img.shape[0], dtype=img.dtype) as dst:
+                        dst.write(img)
+                for idx, image in enumerate(gt):
+                    img = image.cpu().numpy()[0]
+                    with rasterio.open(f'./output/set{i:03}_true{idx}.tif','w', driver='GTiff', height=img.shape[1],
+                                       width=img.shape[2], count=img.shape[0], dtype=img.dtype) as dst:
+                        dst.write(img)
+                for idx, image in enumerate(out):
+                    img = image.cpu().numpy()[0]
+                    with rasterio.open(f'./output/set{i:03}_pred{idx}.tif','w', driver='GTiff', height=img.shape[1],
+                                      width=img.shape[2], count=img.shape[0], dtype=img.dtype) as dst:
+                        dst.write(img)
 
             out = torch.cat(out)
             gt = torch.cat(gt)
@@ -78,16 +97,15 @@ def test(args):
 
             myutils.eval_metrics(out, gt, psnrs, ssims)
 
-    print("PSNR: %f, SSIM: %fn" %
-          (psnrs.avg, ssims.avg))
-    print("Time , " , sum(time_taken)/len(time_taken))
+    print("PSNR: %f, SSIM: %fn" %(psnrs.avg, ssims.avg))
+    print("Average Time, " , sum(time_taken)/len(time_taken))
 
     return psnrs.avg
 
 
 """ Entry Point """
 def main(args):
-    
+
     assert args.load_from is not None
 
     model_dict = model.state_dict()

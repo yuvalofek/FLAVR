@@ -22,6 +22,8 @@ model_arg.add_argument('--nbr_width' , type=int , default=1)
 model_arg.add_argument('--joinType' , choices=["concat" , "add" , "none"], default="concat")
 model_arg.add_argument('--upmode' , choices=["transpose","upsample"], type=str, default="transpose")
 model_arg.add_argument('--channels', type=int, default=3, help="Channels for input data")
+model_arg.add_argument('--ic', type=str, default='modis', help="Image collection to use")
+model_arg.add_argument('--test_im_freq', type=int, default=50, help='Save image every test_im_freq iterations for testing')
 model_arg.add_argument('n_outputs' , type=int, default=1,
                         help="For Kx FLAVR, use n_outputs k-1")
 
